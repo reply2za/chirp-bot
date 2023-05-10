@@ -2,6 +2,9 @@
 import logging
 
 class LoggingFormatter(logging.Formatter):
+    """
+    Format log messages.
+    """
     # Colors
     black = "\x1b[30m"
     red = "\x1b[31m"
