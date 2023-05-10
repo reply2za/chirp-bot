@@ -26,6 +26,11 @@ class CommandService:
     def load_specific_commands(self, sub_directory, command_dict):
         #replace all slashes with dots
         module_prefix = sub_directory.replace('/', '.')[2:]
+        try:
+            os.listdir(sub_directory)
+        except:
+            self.bot.logger.error(f'Could not find directory {sub_directory}')
+            return
         for filename in os.listdir(sub_directory):
             self.bot.logger.info(f'Loading commands ')
             if os.path.isdir(f'{sub_directory}/{filename}'):
