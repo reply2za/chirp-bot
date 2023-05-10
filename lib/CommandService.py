@@ -73,7 +73,7 @@ class CommandService:
     def get_command(self, event: MessageEventLocal):
         # if author is admin, return admin command
         # else return client command
-        if event.statement in self.admin_commands and event.author.id in bot.config['admin_ids']:
+        if event.statement in self.admin_commands and event.author.id in self.bot.config['admin_ids']:
             return self.admin_commands[event.statement]
         else:
             return self.client_commands[event.statement]
