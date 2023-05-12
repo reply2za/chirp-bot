@@ -1,17 +1,22 @@
+import json
 from dotenv import load_dotenv
-from lib.CommandService import CommandService
 load_dotenv()
 import json
 import os
 import platform
 import sys
-from lib.MessageEventLocal import MessageEventLocal
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from lib.logger import init_logger
+from lib.CommandService import CommandService
+from lib.MessageEventLocal import MessageEventLocal
+from lib.ServerManager import Server, servers
+from lib.SheetDatabase import sheet_database
 
 
+
+is_dev = os.getenv('DEV') == 'true'
 
 if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
@@ -31,7 +36,8 @@ bot.config = config
 # initialize the logger
 init_logger(bot)
 
-
+# load data
+servers.deserialize_servers(sheet_database.get_data())
 
 @bot.event
 async def on_ready() -> None:
@@ -41,26 +47,29 @@ async def on_ready() -> None:
     bot.logger.info(f"Logged in as {bot.user.name}")
     bot.logger.info("-------------------")
 
-
 @bot.event
-async def on_message(incomingMessage: discord.Message) -> None:
+async def on_message(message: discord.Message) -> None:
     """
     The code in this event is executed every time someone sends a message, with or without the prefix
 
     :param message: The message that was sent.
     """
-    prefix = config["prefix"]
-    # determine if the message prefix matches the config prefix
-    if not incomingMessage.content.startswith(prefix):
+    if is_dev and message.author.id not in config['owners']:
         return
-    # split the message content into a list of words
-    args = incomingMessage.content.split(" ")
-    # get the command name
-    statement = args[0][len(prefix) :]
-    # remove the command from the list of arguments
+    user_server = servers.get_server(str(message.guild.id))
+    if user_server is None:
+        print('creating server...')
+        prefix = config["prefix"]
+        user_server = Server(message.guild.id, config["prefix"], [])
+        servers.add_server(user_server)
+        print('setting data...')
+        sheet_database.set_data(servers.serialize_servers())
+    if not message.content.startswith(user_server.prefix):
+        return
+    args = message.content.split(" ")
+    statement = args[0][len(user_server.prefix) :]
     args.pop(0)
-    await commandService.execute_command(MessageEventLocal(bot, incomingMessage, prefix, statement, args))
-
+    await commandService.execute_command(MessageEventLocal(bot, user_server, message, statement, args))
 
 
 @bot.event
@@ -112,6 +121,8 @@ async def on_command_error(context: Context, error) -> None:
 
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+    if is_dev:
+        return
     if after.channel is not None and member.guild.id == 1102635525170544731 and len(after.channel.members) < 2:
         update_channel = await bot.fetch_channel('1105276246025318451')
         await update_channel.send(f'{member.name} has joined {after.channel.name}')
@@ -119,5 +130,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 
 commandService = CommandService(bot)
 commandService.load_commands()
+
+if is_dev:
+    bot.logger.info("Running in development mode")
 
 bot.run(os.getenv('DISCORD_BOT_TOKEN'))

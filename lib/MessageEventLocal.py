@@ -1,9 +1,11 @@
 import discord
 
+from lib.ServerManager import Server
+
 
 class MessageEventLocal:
-        def __init__(self, bot, message: discord.Message, prefix: str, statement: str, args: list):
-            self.prefix = prefix
+        def __init__(self, bot, server: Server, message: discord.Message, statement: str, args: list):
+            self.server = server
             self.message = message
             self.bot = bot
             self.statement = statement
