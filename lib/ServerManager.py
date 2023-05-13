@@ -2,12 +2,13 @@
 import json
 from typing import Dict
 
+from lib.SheetDatabase import sheet_database
+
 # contains discord server data, and the voice channels that the user has subscribed to 
 class Server: 
-    def __init__(self, server_id: str, prefix: str, tracked_voice_channels=[]):
+    def __init__(self, server_id: str, prefix: str, tracked_voice_channels: dict={}):
         self.server_id = str(server_id)
         # the voice channels to track for updates
-        self.tracked_voice_channels = []
         self.prefix = prefix
         self.tracked_voice_channels = tracked_voice_channels
     def get_server_id(self) -> str:
@@ -20,8 +21,19 @@ class Server:
             'prefix': self.prefix
             }
         })
-        print(serialized_data)
         return serialized_data
+
+    def track_voice_channel(self, voice_channel_id: str, channel_id: str):
+        self.tracked_voice_channels[voice_channel_id] = {'txt_channel_id': channel_id}
+        self._save()
+
+    def untrack_voice_channel(self, voice_channel_id: str) -> bool:
+        existing_vc = self.tracked_voice_channels.pop(voice_channel_id)
+        self._save()
+        return existing_vc is not None
+
+    def _save(self):
+        sheet_database.set_data(servers.serialize_servers())
     
 
 
@@ -33,6 +45,8 @@ class _ServerManager:
 
     def add_server(self, server: Server):
         self.servers[server.get_server_id()] = server
+        print('setting data...')
+        sheet_database.set_data(servers.serialize_servers())
     
     def get_server(self, server_id):
         if server_id in self.servers:

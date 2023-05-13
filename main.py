@@ -59,11 +59,9 @@ async def on_message(message: discord.Message) -> None:
     user_server = servers.get_server(str(message.guild.id))
     if user_server is None:
         print('creating server...')
-        prefix = config["prefix"]
-        user_server = Server(message.guild.id, config["prefix"], [])
+        user_server = Server(message.guild.id, config["prefix"], {})
+        user_server.track_voice_channel(str(message.author.voice.channel.id), str(message.channel.id))
         servers.add_server(user_server)
-        print('setting data...')
-        sheet_database.set_data(servers.serialize_servers())
     if not message.content.startswith(user_server.prefix):
         return
     args = message.content.split(" ")
@@ -121,11 +119,13 @@ async def on_command_error(context: Context, error) -> None:
 
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    if is_dev:
+    if is_dev and member.id not in config['owners']:
         return
-    if after.channel is not None and member.guild.id == 1102635525170544731 and len(after.channel.members) < 2:
-        update_channel = await bot.fetch_channel('1105276246025318451')
-        await update_channel.send(f'{member.name} has joined {after.channel.name}')
+    if after.channel is not None and len(after.channel.members) < 2:
+        tracked_channel = servers.get_server(str(member.guild.id)).tracked_voice_channels.get(str(after.channel.id))
+        if tracked_channel is not None:
+            update_channel = await bot.fetch_channel(int(tracked_channel['txt_channel_id']))
+            await update_channel.send(f'{member.name} has joined {after.channel.name}')
 
 
 commandService = CommandService(bot)

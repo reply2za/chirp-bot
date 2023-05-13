@@ -31,8 +31,8 @@ class CommandService:
         except:
             self.bot.logger.error(f'Could not find directory {sub_directory}')
             return
+        self.bot.logger.info(f'Loading commands from {sub_directory}')
         for filename in os.listdir(sub_directory):
-            self.bot.logger.info(f'Loading commands ')
             if os.path.isdir(f'{sub_directory}/{filename}'):
                 # load subdirectories
                 command_name = filename
@@ -103,5 +103,5 @@ class CommandService:
         except Exception as e:
             if (not isinstance(e, KeyError)):
                 self.bot.logger.error(f"Error while executing command {event.statement}: {e}")
-    
+
         
