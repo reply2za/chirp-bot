@@ -1,4 +1,5 @@
 import json
+from logging import Logger
 from dotenv import load_dotenv
 load_dotenv()
 import json
@@ -13,7 +14,6 @@ from lib.CommandService import CommandService
 from lib.MessageEventLocal import MessageEventLocal
 from lib.ServerManager import Server, servers
 from lib.SheetDatabase import sheet_database
-
 
 
 is_dev = os.getenv('DEV') == 'true'
@@ -34,7 +34,7 @@ bot = Bot(
 # add the config to the bot so it can be accessed from anywhere
 bot.config = config
 # initialize the logger
-init_logger(bot)
+bot.logger: Logger = init_logger()
 
 # load data
 servers.deserialize_servers(sheet_database.get_data())
@@ -58,9 +58,8 @@ async def on_message(message: discord.Message) -> None:
         return
     user_server = servers.get_server(str(message.guild.id))
     if user_server is None:
-        print('creating server...')
+        bot.logger.info(f"creating server for {message.guild.id}")
         user_server = Server(message.guild.id, config["prefix"], {})
-        user_server.track_voice_channel(str(message.author.voice.channel.id), str(message.channel.id))
         servers.add_server(user_server)
     if not message.content.startswith(user_server.prefix):
         return
@@ -125,7 +124,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         tracked_channel = servers.get_server(str(member.guild.id)).tracked_voice_channels.get(str(after.channel.id))
         if tracked_channel is not None:
             update_channel = await bot.fetch_channel(int(tracked_channel['txt_channel_id']))
-            await update_channel.send(f'{member.name} has joined {after.channel.name}')
+            await update_channel.send(f'{member.nick if member.nick is not None else member.name} has joined {after.channel.name}')
+
 
 
 commandService = CommandService(bot)

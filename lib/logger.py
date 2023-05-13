@@ -34,7 +34,7 @@ class LoggingFormatter(logging.Formatter):
         formatter = logging.Formatter(format, "%Y-%m-%d %H:%M:%S", style="{")
         return formatter.format(record)
 
-def init_logger(bot) -> None:
+def init_logger() -> logging.Logger :
     logger = logging.getLogger("discord_bot")
     logger.setLevel(logging.INFO)
 
@@ -51,4 +51,4 @@ def init_logger(bot) -> None:
     # Add the handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
-    bot.logger: logging.Logger = logger
+    return logger

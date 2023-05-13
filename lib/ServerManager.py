@@ -16,18 +16,24 @@ class Server:
     
     def serialize_data(self): 
         serialized_data = json.dumps({
-            self.server_id : {
-            'tracked_voice_channels': self.tracked_voice_channels,
-            'prefix': self.prefix
-            }
+        'server_id': self.server_id,
+        'tracked_voice_channels': self.tracked_voice_channels,
+        'prefix': self.prefix
+    
         })
         return serialized_data
 
     def track_voice_channel(self, voice_channel_id: str, channel_id: str):
-        self.tracked_voice_channels[voice_channel_id] = {'txt_channel_id': channel_id}
+        if not isinstance(voice_channel_id, str):
+            voice_channel_id = str(voice_channel_id)
+        if not isinstance(channel_id, str):
+            channel_id = str(channel_id)
+        self.tracked_voice_channels.setdefault(voice_channel_id, {'txt_channel_id': channel_id})
         self._save()
 
     def untrack_voice_channel(self, voice_channel_id: str) -> bool:
+        if not isinstance(voice_channel_id, str):
+            voice_channel_id = str(voice_channel_id)
         existing_vc = self.tracked_voice_channels.pop(voice_channel_id)
         self._save()
         return existing_vc is not None
@@ -44,11 +50,12 @@ class _ServerManager:
         self.servers: Dict[str,Server] = {}
 
     def add_server(self, server: Server):
-        self.servers[server.get_server_id()] = server
-        print('setting data...')
+        self.servers[str(server.get_server_id())] = server
         sheet_database.set_data(servers.serialize_servers())
     
     def get_server(self, server_id):
+        if not isinstance(server_id, str):
+            server_id = str(server_id)
         if server_id in self.servers:
             return self.servers[server_id]
         else:
@@ -57,7 +64,7 @@ class _ServerManager:
     def serialize_servers(self):
         serialized_servers = {}
         for server in self.servers.values():
-            serialized_servers.setdefault(server.get_server_id(), server.serialize_data())
+            serialized_servers.setdefault(str(server.get_server_id()), server.serialize_data())
         return json.dumps(serialized_servers)
     
     def deserialize_servers(self, raw_data):
@@ -65,10 +72,8 @@ class _ServerManager:
             return
         list_of_server = dict(json.loads(raw_data))
         for key in list_of_server:
-            servers = eval(list_of_server[key])
-            for a_server in servers:
-                server_values = servers[a_server]
-                self.servers[key] = Server(key, server_values['prefix'], server_values['tracked_voice_channels'])
+            server = eval(list_of_server[key])
+            self.servers[key] = Server(key, server['prefix'], server['tracked_voice_channels'])
     
 
 servers = _ServerManager()

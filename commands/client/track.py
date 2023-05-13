@@ -4,6 +4,9 @@ from lib.MessageEventLocal import MessageEventLocal
 
 
 async def execute(event: MessageEventLocal):
+    if not event.message.guild:
+        await event.message.channel.send("This command can only be used in a server")
+        return
     if len(event.args) < 1:
         await event.message.channel.send(f"*provide a voice channel name to track `(example: {event.server.prefix}track general)`*")
         return
@@ -18,10 +21,12 @@ async def execute(event: MessageEventLocal):
                 if event.server.tracked_voice_channels.get(str(voice_channel.id)):
                     await event.message.channel.send(f"`{voice_channel.name}` is already being tracked")
                     break
-                event.server.track_voice_channel(voice_channel.id, event.message.channel.id)
+                event.server.track_voice_channel(str(voice_channel.id), str(event.message.channel.id))
                 await event.message.channel.send(f"tracking `{voice_channel.name}`")
                 tracked_voice_channels_str += f"{voice_channel.name}, "
                 voice_channel_found = True
                 break
     if voice_channel_found:
         await event.message.channel.send(f'notifications will be sent to this channel for `{tracked_voice_channels_str[:-2]}`')
+    else:
+        await event.message.channel.send(f"*could not find a voice channel named `{arg}`*")
