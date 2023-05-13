@@ -1,6 +1,6 @@
 # Chirp Bot
 
-A dicord bot that tracks voice channels and notifies a text channel when someone joins
+A dicord bot that tracks voice channels and notifies a text channel when someone joins.
 
 Purpose: Let others in the server know when a person joins a voice channel so that a party may begin. 
 
