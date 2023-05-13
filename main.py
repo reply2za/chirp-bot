@@ -39,6 +39,7 @@ servers.deserialize_servers(sheet_database.get_data())
 
 @bot.event
 async def on_ready() -> None:
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='~help'))
     bot.logger.info(f"discord.py API version: {discord.__version__}")
     bot.logger.info(f"Python version: {platform.python_version()}")
     bot.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
