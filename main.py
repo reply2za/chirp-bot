@@ -15,15 +15,13 @@ from lib.MessageEventLocal import MessageEventLocal
 from lib.ServerManager import Server, servers
 from lib.SheetDatabase import sheet_database
 
-
-is_dev = os.getenv('DEV') == 'true'
-
 if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
 else:
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
         config = json.load(file)
 
+is_dev = os.getenv('DEV') == 'true'
 intents = discord.Intents.all()
 
 bot = Bot(
@@ -54,8 +52,13 @@ async def on_message(message: discord.Message) -> None:
 
     :param message: The message that was sent.
     """
-    if is_dev and message.author.id not in config['owners']:
-        return
+    if is_dev:
+        if message.author.id not in config['owners']:
+            return
+        elif message.content.startswith(config['dev_prefix']):
+            message.content = message.content.replace(config['dev_prefix'], config['prefix'])
+        else:
+            return
     user_server = servers.get_server(str(message.guild.id))
     if user_server is None:
         bot.logger.info(f"creating server for {message.guild.id}")
