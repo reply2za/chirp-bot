@@ -23,7 +23,7 @@ async def execute(event: MessageEventLocal):
         if voice_channel_trimmed.lower() == vc_to_track.lower():
             if event.server.tracked_voice_channels.get(str(voice_channel.id)):
                 await event.message.channel.send(f"`{voice_channel_trimmed}` is already being tracked")
-                break
+                return
             event.server.track_voice_channel(str(voice_channel.id), str(event.message.channel.id))
             await event.message.channel.send(f"tracking `{voice_channel_trimmed}`")
             tracked_voice_channels_str += voice_channel_trimmed

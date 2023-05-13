@@ -20,10 +20,9 @@ async def execute(event: MessageEventLocal):
             was_successful = event.server.untrack_voice_channel(str(voice_channel.id))
             if was_successful:
                 await event.message.channel.send(f"Untracked `{voice_channel_trimmed}`")
-                break
+                return
             else:
                 await event.message.channel.send(f"failed to untrack {voice_channel_trimmed}")
-                break
-    if not was_successful:
-        await event.message.channel.send(f"*could not find `{voice_channel_to_untrack}`*")
+                return
+    await event.message.channel.send(f"*could not find `{voice_channel_to_untrack}`*")
 
