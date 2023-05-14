@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "chirp-bot"
+version = "0.1.0"
+description = ""
+authors = ["Zain"]
+readme = "README.md"
+packages = [{include = "chirp_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+discord = "^2.2.3"
+python-dotenv = "^1.0.0"
+gspread = "^5.9.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
