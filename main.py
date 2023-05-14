@@ -1,5 +1,6 @@
 import json
 from logging import Logger
+import time
 from dotenv import load_dotenv
 load_dotenv()
 import json
@@ -119,16 +120,24 @@ async def on_command_error(context: Context, error) -> None:
     else:
         raise error
 
-
+# user-id_channel-id : last_joined timestamp
+last_joined = {}
+# ignore if the user joined again within n seconds
+MIN_SECONDS = 10
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
     if is_dev and member.id not in config['owners']:
+        return
+    member_channel_id = f'{member.id}_{after.channel.id if after.channel is not None else before.channel.id}'
+    # ignore if the user joined again within 30 seconds
+    if member_channel_id in last_joined and (time.time() - last_joined.get(member_channel_id) < MIN_SECONDS):
         return
     if after.channel is not None and len(after.channel.members) < 2:
         tracked_channel = servers.get_server(str(member.guild.id)).tracked_voice_channels.get(str(after.channel.id))
         if tracked_channel is not None:
             update_channel = await bot.fetch_channel(int(tracked_channel['txt_channel_id']))
             await update_channel.send(f'{member.nick if member.nick is not None else member.name} has joined {after.channel.name}')
+            last_joined[member_channel_id] =  time.time()
 
 
 

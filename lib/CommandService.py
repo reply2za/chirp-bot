@@ -49,7 +49,7 @@ class CommandService:
                     if callable(func) and name == 'execute':
                         has_command = True
                         command_function = func
-                        command_dict.setdefault(command_name, func)
+                        command_dict[command_name] =  func
                 if not has_command:
                     self.bot.logger.error(f'No command found for directory {command_name}')
                     continue
@@ -59,14 +59,14 @@ class CommandService:
                         alias_name = inner_filename[:-3]
                         inner_module_name = f'{module_prefix}.{command_name}.{alias_name}'
                         module = importlib.import_module(inner_module_name)
-                        command_dict.setdefault(alias_name, command_function)
+                        command_dict[alias_name] =  command_function
             elif filename.endswith('.py'):
                 # load root files
                 module_name = f'{module_prefix}.{filename[:-3]}'
                 module = importlib.import_module(module_name)
                 for name, func in module.__dict__.items():
                     if callable(func) and name == 'execute':
-                        command_dict.setdefault(filename[:-3], func)
+                        command_dict[filename[:-3]] = func
             else:
                 self.bot.logger.warning('Unexpected file {filename} in commands directory') 
     

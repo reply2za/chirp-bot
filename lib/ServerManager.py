@@ -28,7 +28,7 @@ class Server:
             voice_channel_id = str(voice_channel_id)
         if not isinstance(channel_id, str):
             channel_id = str(channel_id)
-        self.tracked_voice_channels.setdefault(voice_channel_id, {'txt_channel_id': channel_id})
+        self.tracked_voice_channels[voice_channel_id] =  {'txt_channel_id': channel_id}
         self._save()
 
     def untrack_voice_channel(self, voice_channel_id: str) -> bool:
@@ -64,7 +64,7 @@ class _ServerManager:
     def serialize_servers(self):
         serialized_servers = {}
         for server in self.servers.values():
-            serialized_servers.setdefault(str(server.get_server_id()), server.serialize_data())
+            serialized_servers[str(server.get_server_id())] = server.serialize_data()
         return json.dumps(serialized_servers)
     
     def deserialize_servers(self, raw_data):
