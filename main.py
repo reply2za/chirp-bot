@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from lib.logger import init_logger
-from lib.CommandService import CommandService
+from lib.CommandService import commandService
 from lib.MessageEventLocal import MessageEventLocal
 from lib.ServerManager import Server, servers
 from lib.SheetDatabase import sheet_database
@@ -141,9 +141,7 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             last_joined[member_channel_id] =  time.time()
 
 
-
-commandService = CommandService(bot)
-commandService.load_commands()
+commandService.load_commands(bot)
 
 if process_manager.is_dev_mode():
     bot.logger.info("Running in development mode")

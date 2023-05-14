@@ -3,23 +3,24 @@ import os
 
 from lib.MessageEventLocal import MessageEventLocal
 
-class CommandService:
+class _CommandService:
     """
     This class handles the loading and execution of commands.
     """
     
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self):
         self.client_commands = {}
         self.admin_commands = {}
     
-    def load_commands(self):
+    def load_commands(self, bot):
         """
         This function loads all commands from the commands directory.
         Each file name (.py) should match the name of the command.
         The commands directory supports one level of subdirectories, which allow for aliases.
         For subdirectories within the commands folder, the name of the subdirectory must be the name of the command, and the name of the file is the name of the alias.
+        This method should only be called once.
         """
+        self.bot = bot
         self.load_specific_commands('./commands/client', self.client_commands)
         self.load_specific_commands('./commands/admin', self.admin_commands)
         
@@ -105,3 +106,4 @@ class CommandService:
                 self.bot.logger.error(f"Error while executing command {event.statement}: {e}")
 
         
+commandService = _CommandService()
