@@ -2,6 +2,7 @@ import json
 from logging import Logger
 import time
 from dotenv import load_dotenv
+from lib.ProcessManager import process_manager
 load_dotenv()
 import json
 import os
@@ -22,7 +23,6 @@ else:
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
         config = json.load(file)
 
-is_dev = os.getenv('DEV') == 'true'
 intents = discord.Intents.all()
 
 bot = Bot(
@@ -54,7 +54,7 @@ async def on_message(message: discord.Message) -> None:
 
     :param message: The message that was sent.
     """
-    if is_dev:
+    if process_manager.is_dev_mode():
         if message.author.id not in config['owners']:
             return
         elif message.content.startswith(config['dev_prefix']):
@@ -126,7 +126,7 @@ last_joined = {}
 MIN_SECONDS = 10
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    if is_dev and member.id not in config['owners']:
+    if process_manager.is_dev_mode() and member.id not in config['owners']:
         return
     member_channel_id = f'{member.id}_{after.channel.id if after.channel is not None else before.channel.id}'
     # ignore if the user joined again within 30 seconds
@@ -144,7 +144,9 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 commandService = CommandService(bot)
 commandService.load_commands()
 
-if is_dev:
+if process_manager.is_dev_mode():
     bot.logger.info("Running in development mode")
+else :
+    bot.logger.info("Running in production mode")
 
 bot.run(os.getenv('DISCORD_BOT_TOKEN'))
