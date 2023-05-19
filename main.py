@@ -11,7 +11,7 @@ import sys
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
-from lib.logger import init_logger
+from lib.logger import logger
 from lib.CommandService import commandService
 from lib.MessageEventLocal import MessageEventLocal
 from lib.ServerManager import Server, servers
@@ -33,7 +33,7 @@ bot = Bot(
 # add the config to the bot so it can be accessed from anywhere
 bot.config = config
 # initialize the logger
-bot.logger: Logger = init_logger()
+bot.logger: Logger = logger
 
 # load data
 servers.deserialize_servers(sheet_database.get_data())
