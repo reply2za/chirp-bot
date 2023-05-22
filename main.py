@@ -124,13 +124,13 @@ async def on_command_error(context: Context, error) -> None:
 # user-id_channel-id : last_joined timestamp
 last_joined = {}
 # ignore if the user joined again within n seconds
-MIN_SECONDS = 10
+MIN_SECONDS = 15
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
     if process_manager.is_dev_mode() and member.id not in config['owners']:
         return
     member_channel_id = f'{member.id}_{after.channel.id if after.channel is not None else before.channel.id}'
-    # ignore if the user joined again within 30 seconds
+    # ignore if the user joined again within MIN_SECONDS seconds
     if member_channel_id in last_joined and (time.time() - last_joined.get(member_channel_id) < MIN_SECONDS):
         return
     if after.channel is not None and len(after.channel.members) < 2:
