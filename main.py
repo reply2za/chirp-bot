@@ -136,9 +136,9 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
     if after.channel is not None and len(after.channel.members) < 2:
         tracked_channel = servers.get_server(str(member.guild.id)).tracked_voice_channels.get(str(after.channel.id))
         if tracked_channel is not None:
+            last_joined[member_channel_id] =  time.time()
             update_channel = await bot.fetch_channel(int(tracked_channel['txt_channel_id']))
             await update_channel.send(f'{member.nick if member.nick is not None else member.name} has joined `{after.channel.name}`')
-            last_joined[member_channel_id] =  time.time()
 
 
 commandService.load_commands(bot)
