@@ -127,7 +127,7 @@ last_joined = {}
 MIN_SECONDS = 15
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    if process_manager.is_dev_mode() and member.id not in config['owners']:
+    if (process_manager.is_dev_mode() and member.id not in config['owners']) or process_manager.is_active() is not True:
         return
     member_channel_id = f'{member.id}_{after.channel.id if after.channel is not None else before.channel.id}'
     # ignore if the user joined again within MIN_SECONDS seconds
