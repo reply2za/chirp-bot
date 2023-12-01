@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chirp-bot"
-version = "1.0.14"
+version = "1.1.0"
 description = ""
 authors = ["Zain"]
 readme = "README.md"
