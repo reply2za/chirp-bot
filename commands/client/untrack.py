@@ -13,7 +13,6 @@ async def execute(event: MessageEventLocal):
     for arg in event.args:
         voice_channel_to_untrack += f"{arg} "
     voice_channels = event.message.guild.voice_channels
-    was_successful = False
     for voice_channel in voice_channels:
         voice_channel_trimmed = trim_voice_channel_name(voice_channel.name)
         if voice_channel_trimmed.lower() == voice_channel_to_untrack.lower():
