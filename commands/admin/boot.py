@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import discord
 from discord import User
 from lib.MessageEventLocal import MessageEventLocal
 from lib.ProcessManager import process_manager
@@ -9,10 +10,17 @@ from lib.utils import version
 
 REACT_TIMEOUT = 30
 
+last_message: discord.Message | None = None
+
 async def execute(event: MessageEventLocal):
+    global last_message
     message = await event.message.channel.send(get_process_status_txt())
     gear_emoji = "⚙️"
     await message.add_reaction(gear_emoji)
+    if last_message:
+        await last_message.clear_reactions()
+    last_message = message
+
     def check(reaction, user: User):
         return str(reaction.emoji) == gear_emoji and user.id in event.bot.config['owners']
     date_time = datetime.now()
@@ -36,4 +44,4 @@ async def execute(event: MessageEventLocal):
 
 
 def get_process_status_txt():
-    return f'{("active" if process_manager.is_active() else "inactive")}: {str(os.getpid())} (v{version})'
+    return f'{("active" if process_manager.is_active() else "inactive")}: {str(os.getpid())} (v{version})' + (' [dev]' if process_manager.is_dev_mode() else '')

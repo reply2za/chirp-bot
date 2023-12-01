@@ -99,6 +99,7 @@ class _CommandService:
             command = self.get_command(event)
             if command is not None:
                 res = await command(event)
+                # optional
                 # self.__after_command_completion__(event)
                 return res
         except Exception as e:
